@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StoreCard } from '../components/StoreCard';
 import { BACKEND_PORT } from '../config';
+import { HomeNavbar } from '../components/Navbar';
 
 interface Store {
 	store_id: number;
@@ -26,7 +27,8 @@ const Home = () => {
 
 	return (
 		<>
-			<div className='flex justify-center items-center py-56'>
+			<HomeNavbar />
+			<div className='flex justify-center items-center py-40'>
 				<div className='flex flex-col bg-slate-200 px-20 py-5 rounded-lg shadow-sm space-y-4'>
 					<h1 className='m-auto text-2xl'>Daftar Cabang</h1>
 					<div className='h-96 overflow-auto'>

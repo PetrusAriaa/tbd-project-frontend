@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { BACKEND_PORT } from '../config';
 import axios from 'axios';
-import { AddBookNavbar } from '../components/Navbar';
+import { useParams } from 'react-router-dom';
+import { EditBookNavbar } from '../components/Navbar';
 
-const AddBook = () => {
+export default function EditBook() {
 	const [judul, setJudul] = useState('');
 	const [halaman, setHalaman] = useState('0');
-	const [qty, setQty] = useState('1');
 	const [harga, setHarga] = useState('0');
 	const [tahunPublikasi, setTahunPublikasi] = useState('');
 	const [lPenulis, setlPenulis] = useState<any>([]);
@@ -15,27 +14,49 @@ const AddBook = () => {
 	const [penulis, setPenulis] = useState('');
 	const [penerbit, setPenerbit] = useState('');
 
-	const params = useParams();
-	const storeId = params.storeId;
+	const param = useParams();
+	const bookNumber = param.bookNumber;
 
 	const listPenulis = async () => {
 		const _listPenulis = await fetch(`http://${BACKEND_PORT}/authors`);
 		const jsonPenulis = await _listPenulis.json();
 		setlPenulis(jsonPenulis.items);
-		console.log(jsonPenulis.items);
-		setPenulis(jsonPenulis.items[0].author_name);
 	};
+
+	const getBookData = async () => {
+		try {
+			axios.get(`http://${BACKEND_PORT}/books/${bookNumber}`).then(
+				(response) => {
+					const data = response.data.items[0];
+					setPenulis(data.author);
+					setJudul(data.book_name);
+					setPenerbit(data.publisher);
+					setTahunPublikasi(data.publication_year);
+					setHalaman(data.pages);
+					const _harga = data.price;
+					const trim = _harga.replace('$', '');
+					const parsedPrice = parseFloat(trim);
+					setHarga(parsedPrice.toString());
+				},
+				(error) => {
+					console.error(error);
+				}
+			);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
 	const listPublisher = async () => {
 		const _listPublisher = await fetch(`http://${BACKEND_PORT}/publishers`);
 		const jsonPublisher = await _listPublisher.json();
 		setlPublisher(jsonPublisher.items);
-		console.log(jsonPublisher.items);
-		setPenerbit(jsonPublisher.items[0].publisher_name);
 	};
 
 	useEffect(() => {
 		listPenulis();
 		listPublisher();
+		getBookData();
 	}, []);
 
 	const handleSubmit = async (event: React.FormEvent) => {
@@ -43,54 +64,32 @@ const AddBook = () => {
 
 		try {
 			const data = {
-				store: storeId,
 				book_name: judul,
 				publication_year: tahunPublikasi,
 				pages: halaman,
 				pname: penerbit,
-				quantity: qty,
 				price: harga,
-				penulis: penulis,
+				author: penulis,
 			};
 			console.log(data);
-			axios.post(`http://${BACKEND_PORT}/${storeId}/books`, data).then(
+			axios.put(`http://${BACKEND_PORT}/books/${bookNumber}`, data).then(
 				(response) => {
 					console.log(response);
+					alert('Data Updated');
 				},
 				(error) => {
 					console.log(error.response.data);
 				}
 			);
-			setJudul('');
-			setPenulis(lPenulis[0].author_name);
-			setPenerbit(lPublisher[0].publisher_name);
-			setHalaman('0');
-			setQty('1');
-			setHarga('0');
-			setTahunPublikasi('');
 		} catch (err) {
 			console.error('Error:', err);
 		}
 	};
 
-	const handleCancel = () => {
-		setJudul('');
-		setPenulis(lPenulis[0].author_name);
-		setPenerbit(lPublisher[0].publisher_name);
-		setHalaman('0');
-		setQty('1');
-		setHarga('0');
-		setTahunPublikasi('');
-	};
-
 	return (
 		<div>
-			<AddBookNavbar
-				store={{
-					store_id: storeId,
-				}}
-			/>
-			<div className='flex flex-row p-10 justify-center'>
+			<EditBookNavbar />
+			<div className='flex flex-row p-10 pt-32 justify-center'>
 				<form onSubmit={handleSubmit}>
 					<div className='relative z-0 w-full mb-6 group'>
 						<input
@@ -180,21 +179,6 @@ const AddBook = () => {
 							<input
 								type='text'
 								className='block py-2.5 px-0 w-full text-sm text-slate-500 bg-transparent border-0 border-b-2 border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
-								placeholder='default 1'
-								required
-								onChange={(e) => {
-									setQty(e.target.value);
-								}}
-								value={qty}
-							/>
-							<label className='peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>
-								Jumlah Buku
-							</label>
-						</div>
-						<div className='relative z-0 w-full mb-6 group'>
-							<input
-								type='text'
-								className='block py-2.5 px-0 w-full text-sm text-slate-500 bg-transparent border-0 border-b-2 border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
 								placeholder=''
 								required
 								onChange={(e) => {
@@ -213,16 +197,9 @@ const AddBook = () => {
 							className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'>
 							Submit
 						</button>
-						<button
-							onClick={handleCancel}
-							className='text-slate-500 bg-slate-200 hover:bg-slate-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center '>
-							Cancel
-						</button>
 					</div>
 				</form>
 			</div>
 		</div>
 	);
-};
-
-export default AddBook;
+}
