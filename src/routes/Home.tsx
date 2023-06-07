@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StoreCard } from '../components/StoreCard';
+import { BACKEND_PORT } from '../config';
 
 interface Store {
 	store_id: number;
@@ -13,9 +14,9 @@ interface Store {
 const Home = () => {
 	const [data, setData] = useState([]);
 	const getData = async () => {
-		const res = await fetch('http://127.0.0.1:5000/stores');
+		const res = await fetch(`http://${BACKEND_PORT}/stores`);
 		const jsonData = await res.json();
-		setData(jsonData);
+		setData(jsonData.items);
 	};
 	useEffect(() => {
 		getData();
@@ -27,10 +28,12 @@ const Home = () => {
 		<>
 			<div className='flex justify-center items-center py-56'>
 				<div className='flex flex-col bg-slate-200 px-20 py-5 rounded-lg shadow-sm space-y-4'>
-					<h1 className='m-auto text-2xl'>Good Reading Bookstore</h1>
+					<h1 className='m-auto text-2xl'>Daftar Cabang</h1>
 					<div className='h-96 overflow-auto'>
-						{stores.map((store) => (
-							<a href={`/${store.store_id}`}>
+						{stores.map((store, index) => (
+							<a
+								href={`/${store.store_id}`}
+								key={index}>
 								<StoreCard data={store} />
 							</a>
 						))}
