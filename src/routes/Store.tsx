@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { StoreNavbar } from '../components/Navbar';
 import { BACKEND_PORT } from '../config';
+import axios from 'axios';
 
 interface Book {
 	book_name: string;
@@ -39,6 +40,17 @@ const Store = () => {
 		const res = await fetch(`http://${BACKEND_PORT}/stores/${storeId}`);
 		const jsonData = await res.json();
 		setStore(jsonData.items[0]);
+	};
+
+	const handleDelete = async (book_number: number) => {
+		axios
+			.delete(`http://${BACKEND_PORT}/${storeId}/books/${book_number}`)
+			.then((response) => {
+				console.log('Post deleted successfully', response);
+			})
+			.catch((error) => {
+				console.error('Error deleting post:', error);
+			});
 	};
 
 	useEffect(() => {
@@ -79,30 +91,26 @@ const Store = () => {
 											aria-hidden='true'
 											className='w-4 h-4 ml-2 -mr-1'
 											fill='currentColor'
-											viewBox='0 0 20 20'
+											viewBox='0 0 24 24'
 											xmlns='http://www.w3.org/2000/svg'>
-											<path
-												fill-rule='evenodd'
-												d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
-												clip-rule='evenodd'></path>
+											<path d='m12,7V.46c.913.346,1.753.879,2.465,1.59l3.484,3.486c.712.711,1.245,1.551,1.591,2.464h-6.54c-.552,0-1-.449-1-1Zm1.27,12.48c-.813.813-1.27,1.915-1.27,3.065v1.455h1.455c1.15,0,2.252-.457,3.065-1.27l6.807-6.807c.897-.897.897-2.353,0-3.25-.897-.897-2.353-.897-3.25,0l-6.807,6.807Zm-3.27,3.065c0-1.692.659-3.283,1.855-4.479l6.807-6.807c.389-.389.842-.688,1.331-.901-.004-.12-.009-.239-.017-.359h-6.976c-1.654,0-3-1.346-3-3V.024c-.161-.011-.322-.024-.485-.024h-4.515C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h5v-1.455Z' />
 										</svg>
 									</a>
-									<a
-										href={`/${storeId}/books/${book.book_name}`}
-										className='inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300'>
+									<button
+										onClick={(e) =>
+											handleDelete(book.book_number)
+										}
+										className='inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300'>
 										Delete
 										<svg
 											aria-hidden='true'
 											className='w-4 h-4 ml-2 -mr-1'
 											fill='currentColor'
-											viewBox='0 0 20 20'
+											viewBox='0 0 24 24'
 											xmlns='http://www.w3.org/2000/svg'>
-											<path
-												fill-rule='evenodd'
-												d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
-												clip-rule='evenodd'></path>
+											<path d='M17,4V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2V4ZM11,17H9V11h2Zm4,0H13V11h2ZM15,4H9V2h6Z' />
 										</svg>
-									</a>
+									</button>
 								</div>
 							</div>
 						</div>
